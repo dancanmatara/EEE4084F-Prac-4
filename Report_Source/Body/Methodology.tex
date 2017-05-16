@@ -1,0 +1,44 @@
+\section{Methodology}
+\subsection{Hardware}
+Intel Core i5-5200U ; 8GB RAM ; 256GB SSD
+\subsection{Software}
+Linux Mint 18.1. Kernel 4.4.
+gcc version 5.4.0
+\subsection{Implementation}
+Below are descriptions of the equations, scripts and tools used to implement each individual experiment. A notable performance improvement is one that is 1.1 better than an alternate version.\\
+\subsection{Test Data}
+Test data for the medium filters is provided by 4 images of varying sizes. 3 of them where the original images provided within the practical and the final was a 4000x4000 pixel image taken from the popular website reddit. This image represents a perfect square image.\\
+
+\subsection{General Sorting Methodology}
+Bubblesort is an algorithm known to be poor in performance. In fact, it is known to be an algorithm who's sole purpose is to be a metric of a bad sorting algorithm. Before we dive into the alternate sorting algorithms that were used. It is important to discuss the implementation of the sorting algorithms used, specifically in reference to an image.
+
+In the JPEG format. a $NxM$ pixel image is unwrapped into an $Nx3M$ integer array. For any pixel located at position (N,M), the Red, Green, and Blue channels can be extracted as $(N, M +0)$, $(N, M+1)$ and $(N, M+2)$ respectively. These values are stored directly after each other in memory. We can leverage the fact that the pre-fetcher will fetch these values when a cache miss occurs. It was actually noted that using this method we can sort all 3 channels in one passing. \\
+
+
+\subsection{Golden Measure}
+The Golden measure was chosen to be an optimized bubblesort. Optimized bubblesorts decrease the running time by 2 compared to the original bubblesort algorithm. This puts the runtime complexity at $O(N^2)/2$ but constant time decreases are ignored in traditional big-oh notation and thus we can still consider the worst case complexity $O(N^2)$.\\
+
+
+\subsection{Alternate Sorting Algorithms}
+The following three sorting algorithms were used.
+
+\begin{itemize}
+\item Bubble Sort
+\item Insertion Sort
+\item std::sort Sort
+\end{itemize}
+
+Insertion sort is a sort that works well on small datasets. For a 9x9 mask, 81 values is small enough. Although, insertion sort is also a worst case $O(N^2)$ algorithm. It's amortized implementation leads to a constant time decrease. It is expected that insertion sort will perform the best when the data set is small.\newline
+std::sort is expected to work better on the larger datasets but show more consistent results across the board due to its $O(NlogN)$ scalability
+
+\subsection{Data Partitioning and Critical Section}
+The design of a medium filter only relies on knowledge of the immediate pixel and the required mask pixels around it. This leads to an embarrassingly parallel method as there is no data dependency on other pixels being processed first or last. From this we completely \textbf{remove the need for a critical section} as no thread is dependent on information that another thread is using/will produce.
+\newline
+Secondly, we know that the pre-fetcher will fetch the target location plus an additional page of continuous memory. This is very useful, as the next data will immediately be fetched and will be able to be accessed much quicker than RAM when it is required. 
+\newline
+C++ stores 2-Dimensional arrays as Row-Major ordering, this will allow us utalize the ability of the pre-fetcher fully if we traverse the data one row after another as opposed to one column after another.
+\newline
+A third partitioning method was testing by allocating each thread an equal 'block' of the image. This works well for 1:1 images and it is theroized that this will be the most fare distribution of work and will show a performance improvement in 1:1 images.
+\newline
+\subsection{Threaded Implementation}
+Finally, we repeat each experiment using threaded versions of the original algorithm and compare these values against the golden measure. It is expected that a 2-3x speed up will be experienced and that threading improvements will being to decrease once the number of threads exceeds the number of execution cores available.
