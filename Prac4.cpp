@@ -37,21 +37,17 @@ void insertionsort(int *tempArray)
 
 void Master(){
  int  j;
- int returnVal[1];
- int sendVal[3];
+ int returnVal[1];  //Simple single entry Return Buffer
+ int sendVal[3];    //Simple 3-entry Send Buffer (Segment Size, X Width, Y Height)
  MPI_Status stat;
- if(!Input.Read("Data/small.jpg")){
+ if(!Input.Read("Data/greatwall.jpg")){
   printf("Cannot read image\n");
   return;
  }
  if(!Output.Allocate(Input.Width, Input.Height, Input.Components)) return;
-
- // Start of "Hello World" example..............................................
  int yDivident = std::floor((float)(Input.Height)/(numprocs-1));
  int totalSize = Input.Height;
  char buff [yDivident* Input.Width * Input.Components];
- printf("Image Size:\t %d \t %d\t %d\n", Input.Width * Input.Components,Input.Height, yDivident);
-
  char byteBuf[yDivident][Input.Width * Input.Components];
  for(j = 1; j < numprocs; j++){
   sendVal[0] = (j < numprocs-1 ? yDivident * Input.Width * Input.Components: totalSize * Input.Width * Input.Components);
@@ -71,20 +67,20 @@ void Master(){
 
   }
   printf("0: We have %d slaves\n", numprocs-1);
-  MPI_Send(sendVal, 3, MPI_INT, j, TAG, MPI_COMM_WORLD);
-  MPI_Recv(returnVal, 1, MPI_INT, j, TAG, MPI_COMM_WORLD, &stat);
-  MPI_Send(byteBuf, yDivident * Input.Width * Input.Components, MPI_CHAR, j, TAG, MPI_COMM_WORLD);
-  MPI_Recv(returnVal, 1, MPI_INT, j, TAG, MPI_COMM_WORLD, &stat);
+  MPI_Send(sendVal, 3, MPI_INT, j, TAG, MPI_COMM_WORLD);          //Send Dimensions
+  MPI_Recv(returnVal, 1, MPI_INT, j, TAG, MPI_COMM_WORLD, &stat); //Get Response - Prevents blocking
+  MPI_Send(byteBuf, yDivident * Input.Width * Input.Components, MPI_CHAR, j, TAG, MPI_COMM_WORLD); //Send Data
+  MPI_Recv(returnVal, 1, MPI_INT, j, TAG, MPI_COMM_WORLD, &stat); //Get Resonse
   printf("0: Slave %d started\n", j);
   totalSize-=yDivident;
  }
  for(j = 1; j < numprocs; j++){
-  MPI_Recv(byteBuf, yDivident * Input.Width * Input.Components, MPI_CHAR, j, TAG, MPI_COMM_WORLD, &stat);
+  MPI_Recv(byteBuf, yDivident * Input.Width * Input.Components, MPI_CHAR, j, TAG, MPI_COMM_WORLD, &stat); //Ger Result
   printf("0: Slave %d Finished\n", j);
   int k =0;
   int p =0;
   int bufCount = 0;
-  for (k = yDivident*(j-1); k < yDivident*(j);k+=1){
+  for (k = yDivident*(j-1); k < yDivident*(j);k+=1){  //Recombine
     for (p = 0;p < Input.Width * Input.Components;p+=3){
       Output.Rows[k][p + 0] = byteBuf[bufCount][p + 0];
       Output.Rows[k][p + 1] = byteBuf[bufCount][p + 1];

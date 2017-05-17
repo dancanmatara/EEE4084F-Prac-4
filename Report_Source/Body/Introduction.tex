@@ -1,21 +1,5 @@
-section{Introduction}
+\section{Introduction}
+Message Passing Interface (MPI) is a standardized and portable message-passing system. The standard only defines the expected syntax and semantics and not the implementation itself. MPI is used to facilitate the communication of distributed computational devices, each with their own memory. Thus, there is no shared global memory and all communication has to be done explicitly via messags. Thus, MPI is a communications protocol for programming parralele computers. In this paper, a test envrionment is emulated on a local machine to explore the uses of MPI. Experiments are run to explore and undercover differences between the the use of shared memory (As done via Threading) and the use of MPI as well as measure the differences in performance between MPI and threading solutions.
 
-The aim of this document is to report on the results of Practical 2 for the EEE4084F Course. In this practical, we are tasked with investigating the performance (In this scenario the runtime of the process) of a fixed 9x9 medium filter. We begin by creating a reference point. It was chosen to use an optimized bubblesort algorithm (running a single thread).\\
-
-The metrics for investigation are:
-
-\begin{itemize}
-\item Algorithms Used
-\item Number of Threads used
-\item Segmentation (shaping) of data
-\end{itemize}\hfill\\
-
-From here we split the report into 2 sections. Section A details with the speeds up due to using alternate algorithms, however fixed to a single thread of execution. Section B details with the improvements that come from using multi-threaded versions of many algorithms. In this section, shape size, thread count and others are discussed. During the investigation attention is given to when and for how long each thread must enter a critical section.\\
-
-Note the assumptions made for this experiment:
-\begin{itemize}
-\item Performance is measured in terms of speed up against the golden measure.
-\item No memory considerations are taken into account.
-\item A minimum performance of improvement of 5\% is required for it deemed to be relevant
-\end{itemize}
- 
+For this report. MPI was set up in a poin-to-point configuration. That is, there is no inter-slave communication and all communication is done via the master.
+%\todo{Brief Background to MPI, It's use. The simulation envrionment and limitations}
